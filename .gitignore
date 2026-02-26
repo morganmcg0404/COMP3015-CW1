@@ -1,0 +1,50 @@
+# Visual Studio Build Directories
+Debug/
+Release/
+x64/
+x32/
+*.sln
+*.vcxproj.user
+*.vcxproj.filters
+
+# Visual Studio Cache
+.vs/
+.vscode/
+
+# Build and Object Files
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.lib
+*.exp
+*.dll
+*.res
+*.rc
+
+# Temporary and Cache Files
+*.tmp
+*.log
+*.out
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# IDE and Editor
+*.suo
+*.sln.docstates
+.vscode/settings.json
+.vscode/launch.json
+
+# User-generated content
+UpgradeLog*.htm
+screenshots/
+*.mov
+*.mp4
+
+# Runtime generated files
+coin_positions.txt
+terrain_seed.txt
+

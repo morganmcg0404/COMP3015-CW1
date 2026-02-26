@@ -1,0 +1,590 @@
+Image Processing Techniques
+COMP3015 Lab 5
+
+Edge Detection
+Setup
+Download the ‘Additional files’ folder & unzip it. Next, add its contained ‘bs_ears’ file to your
+project’s media folder. In addition, add the ‘random.h’ & sphere cpp & header files to your
+helper folder & add them to your project solution.
+
+Vertex Shader
+Prerequisites
+The vertex shader requires the same standard code that has been used prior, with exception
+to code for edge detection & texture coordinates. Ensure two input vec3 variables named
+‘VertexPosition’ & ‘VertexNormal’ are present, as well as two vec3 output variables named
+‘Position’ & ‘Normal’ that will be passed to the fragment shader.
+
+Main Function
+Transform the normal & position to eye coordinates, & setup ‘gl_Position’ for clipping stage:
+
+Fragment Shader
+Global Variables
+Two input vec3 variables named ‘Position’ & ‘Normal’ are required. Additionally, a uniform
+named ‘RenderTex’ of type sampler2D with a layout index of 0 is necessary. We also need
+two other uniforms, one of type float named ‘EdgeThreshold’ & the other of type int named
+‘Pass.’
+
+Setup the Light & Material uniform structs. The ‘Light’ struct needs 3 variables, one of type
+vec4 named ‘Position’ & two of type vec3 named ‘L’ (diffuse & specular lighting) & ‘La’
+(ambient lighting). The ‘Material’ struct needs all the elements used within the Blinn-Phong
+lighting model. Lastly, we need an output variable of type vec4 named ‘FragColor’ with a
+layout index of location 0.
+
+Add a constant named ‘lum’ for calculating the luminance:
+
+Main Function
+Two types of passes need to be executed.
+
+Pass 1 Function
+The first pass calculates the Blinn-Phong lighting & the result is assigned to a
+RenderTexture.
+
+Pass 2 Function
+The second pass calculates the luminance of each pixel & determines if any given pixel is on
+an edge or not. Pixels on the edge are rendered white, otherwise they are rendered black.
+
+Luminance Function
+
+Scenebasic Uniform Header
+3 private ‘Gluint’ variables named ‘fsQuad,’ ‘fboHandle’ & ‘renderTex’ are required for setting
+up elements: In addition, declare plane, torus & teapot objects privately & 3 private functions
+named ‘setupFBO(),’ ‘pass1()’ & ‘pass2():’
+
+Your private section should look something like this:
+
+Scenebasic Uniform CPP
+Constructor
+Initialise your plane, teapot and torus & setup a rotation speed if you want the camera to
+rotate:
+
+Init Scene Function
+Initialise all the elements needed for setting up the texture, including a quad for rendering.
+The code should look something like this:
+
+Compile, FBO Setup, ETC
+
+Full Screen Quad
+
+Buffer Setup
+
+Vertex Array Object Setup
+
+FBO Setup Function
+
+Update Function
+Use this if you want to animate the camera (use the angle update):
+
+Render Function
+
+Pass 1 Function
+Set the uniforms for the Blinn-Phong lighting for the teapot, torus & plane models & render it
+to the texture:
+
+Pass 2 Function
+Render a full screen quad with our texture in place. Notably, this occurs after the pixels have
+been rendered in either black or white:
+
+Gaussian Blur
+Vertex Shader
+The vertex shader implementation for Gaussian blurring is identical to that of the Edge
+Detection vertex shader implementation.
+
+Fragment Shader
+Global Variables
+The fragment shader implementation is similar to the Edge Detection shader. It makes use of
+3 passes, as opposed to 2. The following code uses the name ‘Texture0’ for the texture
+variable, instead of the name ‘RenderTexture’ as in the case of the edge detection code. The
+texture variable may be renamed for consistency with the following code if desired.
+Regardless, we need a new uniform array of type float:
+
+Main Function
+
+Pass 1 Function
+The first pass function is identical to the previous implementation; just calculate the
+Blinn-Phong model.
+
+Pass 2 Function
+
+Pass 3 Function
+
+Scenebasic Uniform Header
+Your private section should look like the following:
+
+Scenebasic Uniform CPP
+Init Scene Function
+Replace the code for initialising the ‘EdgeThreshold,’ ‘Light.L’ & ‘Light.La’ uniform variables
+with the following:
+
+FBO Setup Function
+The principle of the FBO setup function is still applied, however it is applied to making use of
+2 textures & FBOs:
+
+Render Function
+Call all 3 passes in order:
+
+Pass 1 Function
+The pass 1 function is identical to the one used in the edge detection implementation, with
+the exception that the ‘renderFBO’ is used to write to the texture.
+
+Pass 2 Function
+Use the ‘renderTex’ & ‘intermediateFBO:’
+
+Pass 3 Function
+Use ‘intermediateTex’ & the default buffer:
+
+Gaussian Blur Function
+
+HDR with Tone Mapping
+Vertex Shader
+The vertex shader is identical to the edge detection vertex shader implementation, with
+exception to that it needs to receive the vertex texture coordinates, pass them & output them
+to the fragment shader:
+
+Fragment Shader
+Global Variables
+3 input variables are required, a vec3 named ‘Position’ & 2 vec2 variables named ‘Normal’ &
+‘TexCoord.’ Two output variables are also necessary, one vec4 at layout location 0 named
+‘FragColor’ & one vec3 at layout location 1 named ‘HdrColor:’
+
+Various additional uniforms are required:
+
+Main Function
+
+Pass 1 Function
+
+Pass 2 Function
+
+Scenebasic Uniform Header
+The models that are being rendered are the plane, sphere & teapot. Therefore, your private
+section should appear like the following:
+
+Scenebasic Uniform CPP
+Constructor
+Initialise your constructor with these values:
+
+Init Scene Function
+Setup the quad as in the previous implementations & add the settings of the uniforms after
+the call to the FBO setup function:
+
+FBO Setup Function
+
+Render Function
+
+Pass 1 Function
+Use the ‘hdrFBO’ & draw the scene with all the models:
+
+Pass 2 Function
+Move to the default buffer & render the quad:
+
+Average Luminance Function
+For computing the average luminance, a new function named ‘computeLogAveLuminance’
+needs to be implemented as shown:
+
+Draw Scene Function
+Draw the models into the scene:
+
+Bloom Effect
+Overview
+The bloom effect is achieved with 5 passes:
+- Pass 1: Scene rendered to a HDR texture
+- Pass 2: The bright-pass filter. Parts of the image that are brighter than a certain
+threshold value are extracted. Notably, this filter will make use of a downsampled
+resolution as this generates additional blurring when the buffer is read back using a
+linear sampler
+- Pass 3 & 4: Application of the Gaussian blur to bright parts (refer to the Gaussian
+blur covered earlier)
+- Pass 5: Application of tone mapping & add the result to the blurred bright-pass filter
+result
+
+Vertex Shader
+The vertex shader implementation is identical to that of the HDR tone mapping vertex shader
+implementation.
+
+Fragment Shader
+Global Variables
+The input & output variables within the fragment shader are typical of those in previous
+implementations. Notably, it needs to include the Light & Material uniform structs. In addition
+to this, the following uniforms must be added as shown:
+
+Luminance Function
+
+Main Function
+
+Render Pass Function (1)
+
+Bright Pass Function (2)
+
+First Blur Pass Function (3)
+
+Second Blur Pass Function (4)
+
+Composite Pass Function (5)
+Apply the tone map to the HDR image & combine it with the blurred bright pass filter:
+
+Scenebasic Uniform Header
+As in previous implementations, the plane, sphere & teapot models are used. Additionally,
+the private section should look like the following:
+
+Scenebasic Uniform CPP
+Init Scene Function
+The initScene() function is a bit more complex than in previous implementations, however it
+remains similar.
+
+Uniforms, Quad & Buffers
+
+Weights, Normalisation & Sampling
+
+FBO Setup Function
+
+Render Function
+
+Render Pass Function (1)
+Use the same code from the HDR tone mapping pass 1 function implementation.
+
+Bright Pass Function (2)
+Use the same code from the Gaussian blur pass 2 function implementation, but make use of
+the blurFBO & write to tex1 instead:
+
+First Blur Pass Function (3)
+Write to tex2 instead:
+
+Second Blur Pass Function (4)
+Do a second pass & write to tex2:
+
+Composite Pass Function (5)
+Use the default buffer, write to the screen & bring everything together:
+
+Previous Functions
+Use the same average luminance & scene drawing function implementations used for HDR
+tone mapping. Additionally, use the same gaussian blur function used for the gaussian blur
+implementation.
+
+Gamma Correction
+Implementing gamma correction is very simple. Create a variable named ‘Gamma’ & set it to
+an appropriate value. Experiment with different values to determine a good one. In the
+fragment shader, add it to the final colour before passing it to ‘FragColour:’
+
+Deferred Shading
+Overview
+Pass 1
+Render the scene, but as opposed to evaluating the reflection model to determine the
+fragment colour, store the geometry information in an intermediate set of buffers, collectively
+referred to as the geometry buffer (g-buffer). Geometric information required includes but is
+not limited to the position, normal, texture coordinate & reflectivity.
+
+Pass 2
+Read from the g-buffer, evaluate the reflection model & produce a final colour for each pixel.
+
+Vertex Shader
+The vertex shader implementation should be similar to the implementation used for the
+Bloom effect.
+
+Fragment Shader
+Global Variables
+The fragment shader includes the typical input & output variables as used in previous
+implementations. Notably, it needs to include the Light & Material uniform structs.
+Additionally, it requires the following uniforms:
+
+Lighting Model
+You can opt between the Blinn-Phong or diffuse models for light calculations. This lab will
+make use of the diffuse model.
+
+Main Function
+
+Pass 1 Function
+The first pass stores the position, normal and diffuse in textures:
+
+Pass 2 Function
+The second pass retrieves the position, normal & colour:
+
+Scenebasic Uniform Header
+The following private object variables are required:
+
+Scenebasic Uniform CPP
+Constructor
+The same constructor used in the edge detection implementation is used:
+
+Init Scene Function
+
+FBO Setup Function
+
+Geometry Buffer Texture Creation Function
+
+Update Function
+Use the update function from the edge detection implementation
+
+Render Function
+Call the first & second pass functions in order.
+
+Pass 1 Function
+Render the scene & send it to the ‘deferredFBO:’
+
+Pass 2 Function
+Use the default buffer & render the quad:
+
+Appendix
+Bloom Effect
+Composite Pass Function (5)
+// (Read from BlurTex1 and HdrTex, write to default buffer).
+vec4 pass5() {
+/////////////// Tone mapping ///////////////
+// Retrieve high-res color from texture
+vec4 color = texture( HdrTex, TexCoord );
+// Convert to XYZ
+vec3 xyzCol = rgb2xyz * vec3(color);
+// Convert to xyY
+float xyzSum = xyzCol.x + xyzCol.y + xyzCol.z;
+vec3 xyYCol = vec3( xyzCol.x / xyzSum, xyzCol.y / xyzSum, xyzCol.y);
+// Apply the tone mapping operation to the luminance (xyYCol.z or xyzCol.y)
+float L = (Exposure * xyYCol.z) / AveLum;
+L = (L * ( 1 + L / (White * White) )) / ( 1 + L );
+// Using the new luminance, convert back to XYZ
+xyzCol.x = (L * xyYCol.x) / (xyYCol.y);
+xyzCol.y = L;
+xyzCol.z = (L * (1 - xyYCol.x - xyYCol.y))/xyYCol.y;
+// Convert back to RGB
+vec4 toneMapColor = vec4( xyz2rgb * xyzCol, 1.0);
+///////////// Combine with blurred texture /////////////
+// We want linear filtering on this texture access so that
+// we get additional blurring.
+vec4 blurTex = texture(BlurTex1, TexCoord);
+return toneMapColor + blurTex;
+}
+
+Uniforms, Quad & Buffers
+void SceneBasic_Uniform::initScene()
+{
+compile();
+glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+glEnable(GL_DEPTH_TEST);
+vec3 intense = vec3(0.6f);
+prog.setUniform("Lights[0].L", intense);
+prog.setUniform("Lights[1].L", intense);
+prog.setUniform("Lights[2].L", intense);
+intense = vec3(0.2f);
+prog.setUniform("Lights[0].La", intense);
+prog.setUniform("Lights[1].La", intense);
+prog.setUniform("Lights[2].La", intense);
+projection = mat4(1.0f);
+angle = glm::pi<float>() / 2.0f;
+setupFBO();
+// Array for full-screen quad
+GLfloat verts[] = {
+-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+-1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f
+};
+GLfloat tc[] = {
+0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
+};
+// Set up the buffers
+unsigned int handle[2];
+glGenBuffers(2, handle);
+glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
+glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(float), verts, GL_STATIC_DRAW);
+
+glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
+glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), tc, GL_STATIC_DRAW);
+// Set up the vertex array object
+glGenVertexArrays(1, &fsQuad);
+glBindVertexArray(fsQuad);
+glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
+glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+glEnableVertexAttribArray(0); // Vertex position
+glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
+glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+glEnableVertexAttribArray(2); // Texture coordinates
+glBindVertexArray(0);
+prog.setUniform("LumThresh", 1.7f);
+float weights[10], sum, sigma2 = 25.0f;
+// Compute and sum the weights
+weights[0] = gauss(0, sigma2);
+sum = weights[0];
+for (int i = 1; i < 10; i++) {
+weights[i] = gauss(float(i), sigma2);
+sum += 2 * weights[i];
+}
+// Normalize the weights and set the uniform
+for (int i = 0; i < 10; i++) {
+std::stringstream uniName;
+uniName << "Weight[" << i << "]";
+float val = weights[i] / sum;
+prog.setUniform(uniName.str().c_str(), val);
+}
+// Set up two sampler objects for linear and nearest filtering
+GLuint samplers[2];
+glGenSamplers(2, samplers);
+
+linearSampler = samplers[0];
+nearestSampler = samplers[1];
+GLfloat border[] = { 0.0f,0.0f,0.0f,0.0f };
+// Set up the nearest sampler
+glSamplerParameteri(nearestSampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glSamplerParameteri(nearestSampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glSamplerParameteri(nearestSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+glSamplerParameteri(nearestSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+glSamplerParameterfv(nearestSampler, GL_TEXTURE_BORDER_COLOR, border);
+// Set up the linear sampler
+glSamplerParameteri(linearSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glSamplerParameteri(linearSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glSamplerParameteri(linearSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+glSamplerParameteri(linearSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+glSamplerParameterfv(linearSampler, GL_TEXTURE_BORDER_COLOR, border);
+// We want nearest sampling except for the last pass.
+glBindSampler(0, nearestSampler);
+glBindSampler(1, nearestSampler);
+glBindSampler(2, nearestSampler);
+}
+
+FBO Setup Function
+//sets up the fbo for rendering to a texture
+void SceneBasic_Uniform::setupFBO() {
+// Generate and bind the framebuffer
+glGenFramebuffers(1, &hdrFbo);
+glBindFramebuffer(GL_FRAMEBUFFER, hdrFbo);
+// Create the texture object
+glGenTextures(1, &hdrTex);
+glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, hdrTex);
+glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, width, height);
+
+// Bind the texture to the FBO
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrTex,
+0);
+// Create the depth buffer
+GLuint depthBuf;
+glGenRenderbuffers(1, &depthBuf);
+glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
+glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+// Bind the depth buffer to the FBO
+glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+GL_RENDERBUFFER, depthBuf);
+// Set the targets for the fragment output variables
+GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+glDrawBuffers(1, drawBuffers);
+// Create an FBO for the bright-pass filter and blur
+glGenFramebuffers(1, &blurFbo);
+glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
+// Create two texture objects to ping-pong for the bright-pass filter
+// and the two-pass blur
+bloomBufWidth = width / 8;
+bloomBufHeight = height / 8;
+glGenTextures(1, &tex1);
+glActiveTexture(GL_TEXTURE1);
+glBindTexture(GL_TEXTURE_2D, tex1);
+glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, bloomBufWidth, bloomBufHeight);
+glActiveTexture(GL_TEXTURE2);
+glGenTextures(1, &tex2);
+glBindTexture(GL_TEXTURE_2D, tex2);
+glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, bloomBufWidth, bloomBufHeight);
+// Bind tex1 to the FBO
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex1, 0);
+glDrawBuffers(1, drawBuffers);
+
+// Unbind the framebuffer, and revert to default framebuffer
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+Deferred Shading
+Init Scene Function
+void SceneBasic_Uniform::initScene()
+{
+compile();
+glEnable(GL_DEPTH_TEST);
+float c = 1.5f;
+angle = glm::pi<float>() / 2.0f;
+// Array for quad
+GLfloat verts[] = {
+-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+-1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f
+};
+GLfloat tc[] = {
+0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
+};
+// Set up the buffers
+unsigned int handle[2];
+glGenBuffers(2, handle);
+glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
+glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(float), verts, GL_STATIC_DRAW);
+glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
+glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), tc, GL_STATIC_DRAW);
+// Set up the vertex array object
+glGenVertexArrays(1, &quad);
+glBindVertexArray(quad);
+
+glBindBuffer(GL_ARRAY_BUFFER, handle[0]);
+glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+glEnableVertexAttribArray(0); // Vertex position
+glBindBuffer(GL_ARRAY_BUFFER, handle[1]);
+glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+glEnableVertexAttribArray(2); // Texture coordinates
+glBindVertexArray(0);
+setupFBO();
+prog.setUniform("Light.L", vec3(1.0f));
+}
+
+FBO Setup Function
+void SceneBasic_Uniform::setupFBO()
+{
+GLuint depthBuf, posTex, normTex, colorTex;
+// Create and bind the FBO
+glGenFramebuffers(1, &deferredFBO);
+glBindFramebuffer(GL_FRAMEBUFFER, deferredFBO);
+// The depth buffer
+glGenRenderbuffers(1, &depthBuf);
+glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
+glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+// Create the textures for position, normal and color
+createGBufTex(GL_TEXTURE0, GL_RGB32F, posTex); // Position
+createGBufTex(GL_TEXTURE1, GL_RGB32F, normTex); // Normal
+createGBufTex(GL_TEXTURE2, GL_RGB8, colorTex); // Color
+// Attach the textures to the framebuffer
+glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+depthBuf);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, posTex,
+0);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normTex,
+0);
+
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, colorTex,
+0);
+GLenum drawBuffers[] = { GL_NONE, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1,
+GL_COLOR_ATTACHMENT2 };
+glDrawBuffers(4, drawBuffers);
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+Pass 1 Function
+void SceneBasic_Uniform::pass1()
+{
+prog.setUniform("Pass", 1);
+glBindFramebuffer(GL_FRAMEBUFFER, deferredFBO);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+glEnable(GL_DEPTH_TEST);
+view = glm::lookAt(vec3(7.0f * cos(angle), 4.0f, 7.0f * sin(angle)), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+projection = glm::perspective(glm::radians(60.0f), (float)width / height, 0.3f, 100.0f);
+prog.setUniform("Light.Position", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+prog.setUniform("Material.Kd", 0.9f, 0.9f, 0.9f);
+model = mat4(1.0f);
+model = glm::translate(model, vec3(0.0f, 0.0f, 0.0f));
+model = glm::rotate(model, glm::radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+setMatrices();
+teapot.render();
+prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+model = mat4(1.0f);
+model = glm::translate(model, vec3(0.0f, -0.75f, 0.0f));
+setMatrices();
+plane.render();
+prog.setUniform("Light.Position", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+prog.setUniform("Material.Kd", 0.2f, 0.5f, 0.9f);
+model = mat4(1.0f);
+
+model = glm::translate(model, vec3(1.0f, 1.0f, 3.0f));
+model = glm::rotate(model, glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+setMatrices();
+torus.render();
+glFinish();
+}
+
+

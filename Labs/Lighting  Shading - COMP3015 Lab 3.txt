@@ -1,0 +1,131 @@
+Lighting & Shading
+COMP3015 Lab 3
+
+Directional Light
+Ambient, diffuse & specular lighting in the vertex shader are required for directional light.
+However, variables for light information that are sent to the shader should be directions as
+opposed to positions. The result of this is that you don’t need to calculate the light direction
+within the shader. Look at the lecture slides in order to understand how to make distinctions
+between light directions & positions.
+
+Multiple Lights
+Overview
+Ambient, diffuse & specular lighting, as in the previous lab, are required for directional light.
+The only difference is that the light calculations need to be applied to 3 lights as opposed to
+one. The fragment shader can be kept similar to the previous shader.
+
+Vertex Shader
+The vertex shader requires two vec3 input variables named VertexPosition & VertexNormal,
+indexed at locations 0 & 1 respectively. It also requires one output vec3 variable named
+Colour.
+Two uniform structs are required. The first, as displayed below, contains the various lights:
+
+The second required struct is for the material:
+
+We need to create a function for calculating the ambient, diffuse & specular light. We will call
+the function phongModel. The function’s return type should be vec3 & include the following
+parameters: int light, vec3 position, vec3 normal.
+
+In the main() function, convert the vertex normal to eye coordinates. The result should be a
+vec3 (use NormalMatrix). Ensure the result is normalised.
+
+Convert the vertex position to eye coordinates. The result should be a vec4 (use
+ModelViewMatrix). After this, evaluate the lighting equation for each light as shown below:
+
+Lastly, set gl_Position as shown below:
+
+Setup
+1. We need to import some files into the project. Unpack the folder on the DLE & add
+the following files to your project’s helper folder: aabb.h, utils.h, objmesh.h,
+objmesh.cpp, plane.h & plane.cpp.
+2. Once the required files are in the helper folder, ensure they are added to the project
+solution, as done in previous sessions.
+3. Lastly, add the pig_triangulated.obj file to your project’s media folder. Do not add it to
+your project solution. This is unnecessary as it is not a code file & in this case will
+cause errors.
+
+Scenebasic Uniform
+Header
+Include the plane.h & objmesh.h files at the top of your header file & remove the torus.h
+include if still present. Add the two new variables as shown below & ensure they are private:
+
+CPP
+Includes
+Include sstream at the top of the file:
+
+Constructor
+Within the constructor, replace the torus with the plane & load the pig_triangulated.obj file as
+a mesh, as displayed below:
+
+initScene() Function
+Set the camera & the 3 lights’ positions:
+
+Set the uniforms for the lights & put together the diffuse & the specular lights under a light
+called L as shown below. Also, ensure you set the uniforms for the ambient light.
+
+Render() Function
+Set the Material struct uniforms for our plane & pig mesh:
+
+Per-Fragment Shading (Phong Model)
+Overview
+Use the multiple lights example, however use one light instead of 3. Also, ensure all
+calculations are done in the fragment shader as opposed to the vertex shader.
+
+Vertex Shader
+Use the following code as your vertex shader for your Phong model implementation. This
+has been covered prior, however if anything is unclear do ask for help.
+
+Fragment Shader
+Create a function of type vec3 called phongModel with the following parameters: vec3
+position & vec3 normal. When called, it will be used to return a vec3 composed of Ambient +
+Diffuse + Specular. Pass the vec3 vector into FragColour. See the lecture slides for
+elaboration / extra details.
+
+Blinn-Phong Model
+This model is similar to the Phong model, however the reflection vector isn’t present & you
+use the half vector. See the lecture slides for details regarding its implementation.
+
+Spotlight Model
+Shaders
+Use the same vertex shader as used for the Blinn-Phong model. Regarding the fragment
+shader however, see the lecture slides for its implementation.
+
+Scenebasic_Uniform CPP
+There are a few settings that make implementation easier. Within the constructor, we need to
+initialise our 3 objects: The plane, teapot & torus. Use the parameters as specified in the
+code below:
+
+The code below displays how the initScene() function should look:
+
+The code below displays the render() function. If the nature of the code is confusing, do ask:
+
+Toon Shading
+Overview
+Use the same vertex shader as used for the Blinn-Phong model. Regarding the fragment
+shader however, see the lecture slides for its implementation.
+
+Scenebasic Uniform CPP
+You can use the same format as used in the spotlight implementation. If you desire, the
+specular implementation can be skipped in order to result in a more natural look. If you want
+to animate the light, use two variables named “tPrev” & “angle,” both of type float & set both
+of their values to 0 in initScene().
+Update the angle value in the update() function:
+
+Update the light position value with your angle variable in the render() function:
+
+Fog Simulation
+Overview
+Use the same vertex shader as used for the Blinn-Phong model. Regarding the fragment
+shader however, see the lecture slides for its implementation.
+
+Scenebasic Uniform CPP
+You can use the same format as used in the spotlight implementation. In the initScene()
+function, set all the non-changing uniforms, including at least the following:
+
+Note that the fog is being applied to objects as opposed to the background. Because of this,
+the fog & background need to use the same colour in order to look realistic.
+Experiment with the distance (z value) of the objects (teapot, torus, etc) in order to manifest
+different fog values around your objects. The further away an object is, the more fog that is
+applied to it. If anything is unclear / you are stuck, do ask for help.
+
+

@@ -1,0 +1,275 @@
+Textures
+COMP3015 Lab 4
+
+Single Texture
+Setup
+Before coding, download the ‘Additional files’ folder and unzip it. Inside, add the
+‘stb_image.cpp’ file to your project’s helper/stb folder. Next, within the project’s ‘media’ folder,
+add a new folder called ‘texture’ & add the ‘Additional files’ folder’s texture & cube header &
+cpp files to it respectively. Lastly, add the stb_image.cpp, texture & cube files to the Visual
+Studio project’s solution.
+
+Vertex Shader
+The vertex shader will continue to make use of the Blinn-Phong model. The only addition
+necessary are the vertex texture coordinates. Add an input variable named vec2 indexed at
+location 2 called ‘VertexTexCoord’ & an out variable of type vec2 named ‘TexCoord.’ In the
+main function, set TexCoord’s value to VertexTexCoord:
+
+Fragment Shader
+Add an in variable of type vec2 named ‘TexCoord’ & a uniform layout with a binding index of
+0 of type sampler2D. The sampler2D type is used for 2-dimensional textures.
+
+In the Blinn-Phong function, acquire the colour for each fragment & set it to a vec3 variable
+named ‘texColor:’
+
+Lastly, calculate the ambient & diffuse with the use of the texColor variable.
+
+Scenebasic Uniform Header
+Add a variable of type Cube called ‘cube.’
+
+Scenebasic Uniform CPP
+Init Scene Function
+Set the view and projection:
+
+Set your light uniforms & load the texture file:
+
+Render Function
+Set the ‘Light.Position,’ ‘Material.Ks’ and ‘Material.Shininess’ uniforms. Notably, don’t forget
+to call render on the cube.
+
+Multiple Textures
+Vertex Shader
+When implementing multiple textures, the vertex shader is unaffected. Use the vertex shader
+implementation used prior for singular textures.
+
+Fragment Shader
+Use the same fragment shader used for singular textures, but add another uniform of type
+sampler2D. Make sure you set its layout index to 1. Now there are 2 textures present in the
+fragment shader:
+
+In the Blinn-Phong function, extract the colour for each texture, similarly to how this was
+done for one texture previously. When doing so, combine the colours with the GLSL mix
+function, using the alpha channel of the ‘mossTexColor’ as an interpolator:
+
+The rest of the shader stays the same; just use col for any light calculations.
+
+Scenebasic Uniform
+In the scenebasic_uniform files, we need to make use of 2 textures in the initScene()
+function. Bind them to GL_TEXTURE 0 & 1 respectively:
+
+Alpha Test (Discard)
+Vertex Shader
+The vertex shader remains the same as implemented for multiple textures.
+
+Fragment Shader
+The same fragment shader implemented for multiple textures is necessary, however it needs
+some changes. Bind 2 textures named ‘BaseTex’ & ‘AlphaTex.’ Next, unpack the ‘texColour’
+variable for the base texture in the Blinn Phong function & do all the light calculations with it:
+
+In the main function, keep or discard fragments based on an alpha value with the use of
+‘alphaTexture.’ First, unpack ‘AlphaTex’ into a new variable named ‘alphaMap’ of type vec4.
+Then, use an if statement to check for any value under 0.15. If any value is below 0.15, the
+fragment is discarded, otherwise it is rendered:
+
+.This works on face value, however some issues do arise. The back of the fragments that
+point away from the light are in the dark. Therefore, lighting must be calculated for them as
+well. Use gl_FrontFacing with an if statement to check for this. Anything found to be front
+facing should have its lighting calculated in the same way as just implemented. Anything
+found to be back facing must use the same formula, but with the normal reversed.
+
+Scenebasic Uniform
+Use a teapot model for the object that is rendered, since it is easier to see the effect that has
+been applied with the teapot:
+
+Normal Mapping
+Vertex Shader
+The vertex shader is similar to the implementation used in the previous implementations.
+First, add two new layout variables named ‘vertexNormal’ & ‘vertexTangent’ at the location
+indexes of 2 & 3 respectively. The existing ‘VertexPosition’ & ‘VertexNormal’ variables should
+be indexed at locations 0 & 1 respectively:
+
+Next, define a light uniform struct and all the uniforms for the matrices used in
+transformations. Use the previous examples of the vertex shaders as references. We will
+need 3 out variables named ‘LightDirection,’ ‘TexCoord’ & ‘ViewDir:’
+
+In the main() function, transform normal and tangent to eye space:
+
+Compute the binormal:
+
+Set the matrix for transformation to tangent space:
+
+Transform the light direction & view direction to tangent space:
+
+Lastly, pass the value of ‘VertexTexCoord’ to ‘TexCoord’ so the fragment shader can use it
+for its calculations. Notably, don’t forget to set ‘gl_position’ for the next stage.
+
+Fragment Shader
+3 in vectors are needed, which will be called ‘LightDir’, ‘TexCoord’ & ‘ViewDir:’
+
+Declare 2 uniforms for textures named ‘ColorTex’ & ‘NormalMapTex:’
+
+Ensure that your material & light uniform struct is declared & that your out vector is
+‘FragColor.’ Then, in the main function unpack the normal & set it to a range between 0 & 1.
+Note that normals are sometimes within the range of -1 to 1 instead:
+
+Pass the result of the Blinn-Phong function to FragColor. In the Blinn-Phong function itself,
+the standard Blinn-Phong model is calculated, however the light & view direction calculations
+can be omitted. This is because they have already been determined in the vertex shader.
+
+Scenebasic Uniform Header
+The scenebasic_uniform header file is similar to that of the previous files, however this time
+the model of an ogre head will be used. In order to use it, add the ‘bs_ears’ file to your
+project’s media folder. Next, add an include for the ‘objmesh.h’ file so the ogre model’s can
+be created as type ‘ObjMesh.’ Lastly, create a private object variable as shown below:
+
+Scenebasic Uniform CPP
+Load the ogre model in the constructor:
+In the initScene() function, set the view to the following:
+
+Set the uniforms for ‘Light’ & ‘material,’ & load & bind the textures for diffuse
+(“ogre_diffuse.png”) & normal (“ogre_normalmap.png”). Lastly, render the model in the
+render function.
+
+Skybox with Cube Maps
+Vertex Shader
+Create a layout variable indexed at location 0 of type vec3 named ‘VertexPosition:’
+
+Create an out variable of type vec3 named ‘Vec’ for passing ‘VertexPosition’ to the fragment
+shader. The MVP uniform is also needed, as it is added to gl_Position. In the main function,
+assign the ‘VertexPosition’ to ‘Vec’ & multiply ‘MVP’ with ‘vec4(VertexPosition, 1.0).’
+
+Fragment Shader
+Create a layout uniform at the binding index of 0 of type samplerCube named ‘SkyBoxTex:’
+
+Create a vec3 input variable named ‘Vec,’ & an out variable of type vec4 named ‘FragColor.’
+Use previous examples as references for how to declare ‘FragColour.’ Then, in the main
+function extract the colour from the texture:
+
+Lastly, assign ‘texColor’ to ‘FragColor.’
+
+Scenebasic Uniform Header
+Add the skybox header & cpp files to your project’s solution & create a variable named ‘sky’
+of type ‘SkyBox:’
+
+Create 3 new private object variables of type float named ‘angle,’ ‘tPrev’ & ‘rotSpeed:’
+
+Scenebasic Uniform CPP
+Constructor
+
+Init Scene Function
+
+Update Function
+
+Render Function
+
+Additional Materials
+Projected Textures
+Vertex Shader
+Inputs
+Create two input variables of type vec3 named ‘VertexPosition’ & ‘VertexNormal’ at layout
+indexes 0 & 1 respectively.
+
+Outputs
+Additionally, create 3 out variables, one of type vec3 named ‘EyeNormal’ & two of type vec4
+named ‘EyePosition’ & ‘ProjTexCoord.’
+
+Uniforms
+Create 5 uniforms, one of type mat3 named ‘NormalMatrix’ & the rest of type mat4, named
+‘ProjectorMatrix,’ ‘ModelViewMatrix,’ ‘ModelMatrix’ & ‘MVP.’
+
+Main Function
+Alter ‘vertexPosition’ to be a vec4:
+
+Turn your normals from model coordinates into eye coordinates & apply the result to
+EyeNormal:
+
+Turn your pos4 from model coordinates into eye coordinates & pass the result to
+EyePosition. Notably, no normalisation is needed for this. Next, acquire the projected texture
+coordinates:
+
+Lastly, multiply gl_Position with ‘MVP.’
+
+Fragment Shader
+Inputs & Outputs
+Create 3 input variables, two of type vec3 named ‘EyeNormal’ & ‘EyePosition’ & one of type
+vec4 named ‘ProjTexCoord.’ Also create one out variable named ‘FragColor.’
+
+Uniforms
+Create two uniform structs named ‘Light’ & ‘Material.’ The ‘Light’ struct needs to contain
+‘Position,’ ‘L’ for diffuse & specular lighting & ‘La’ for ambient lighting. The ‘Material’ struct
+needs to contain ‘Ka,’ ‘Kd,’ ‘Ks, & ‘Shininess.’ One last uniform for the projected texture is
+also required, as shown below:
+
+Blinn-Phong Function
+Note that a Blinn-Phong function is necessary for calculation of colour. If one does not
+currently exist in your project, implement it.
+
+Main Function
+Create a variable of type vec3 named ‘color’ & pass the result of the Blinn-Phong function to
+it:
+
+Create a variable of type vec3 named ‘projTexColour’ & use an if statement to check as to
+whether its z value is positive. If z is positive, the location is in front of the projector &
+therefore we proceed with the texture look up:
+
+Apply the colours of both the model’s corresponding pixel & projected texture to FragColor:
+
+7. That’s it with the fragment shader
+
+Scenebasic Uniform Header
+Use both a teapot & plane model. Additionally, if it is desired that the camera is to rotate,
+make use of the ‘angle,’ ‘tPrev’ & ‘rotSpeed’ floats in order to achieve this.
+
+Scenebasic Uniform CPP
+Constructor
+Use the constructor to initialise all the variables that were declared earlier:
+
+Init Scene Function
+Setup the projector matrix:
+
+Load and set up the projected texture:
+
+Setup the light uniform:
+
+Update Function
+If you want to rotate the camera, add the following:
+
+Render Function
+Setup the camera:
+
+Setup the material struct’s uniforms:
+
+Setup & render the teapot:
+
+Setup the material struct’s plane related uniforms & render the plane:
+
+Set Matrices Function
+Set your model matrix uniform:
+
+Rendering to a Texture
+Implementation
+For a reference of an implementation of rendering to a texture, see the relevant lecture
+recording.
+
+Setup & Scenebasic Uniform Header
+Add the ‘spot’ folder from within the ‘Additional files’ folder to your project’s ‘media’ folder.
+First add “spot” folder from Additional files to “media” folder. Next, load the spot object, add a
+Gluint fboHandle & create the methods ‘setupFBO(),’ ‘renderToTexture()’ & ‘renderScene().’
+Lastly, clear the teapot & plane from the constructor. The only variables used in the
+constructor that are required are ‘angle,’ ‘tPrev’ & ‘rotSpeed.’
+
+Scenebasic Uniform CPP
+Init Scene Function
+
+FBO Setup Function
+Framebuffer & Texture Object
+
+Depth Buffer & Fragment Output
+
+Render Function
+
+Render to Texture Function
+
+Render Scene Function
+
+
