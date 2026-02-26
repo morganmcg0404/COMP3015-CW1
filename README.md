@@ -144,11 +144,77 @@ COMP3015-CW1/
 - Water Damping: 0.6x velocity bounce factor
 - Smooth camera height interpolation at 8.0 units/sec
 
+### Lighting Model (Blinn-Phong)
+- **Half-Vector Calculation:** `H = normalize(L + V)` where L is light direction, V is view direction
+- **Ambient Component:** Multiplied by base texture color for scene brightness
+- **Diffuse Component:** `max(0.0, dot(N, L)) * texture` where N is surface normal
+- **Specular Component:** `pow(max(0.0, dot(N, H)), shininess)` for specular highlights
+- **Material Properties:** Adjustable shininess per texture (terrain: 32-128, coins: 64)
+- **Dynamic Lighting:** Sun direction recalculated each frame based on day-night cycle
+
+### Normal Mapping Implementation
+- **TBN Matrix:** Computed from vertex positions and texture coordinates
+- **Tangent Space:** Transforms per-pixel normals from normal map into world space
+- **Normal Map Sampling:** RGB channels [0-1] remapped to [-1, 1] for normal directions
+- **Per-Texture Intensity:** Adjustable normal map strength (0.5-1.0 multiplier)
+- **Shader Location:** Implemented in `basic_uniform.frag` with proper tangent frame transformation
+
+### Terrain Generation Algorithm
+- **Noise Function:** Seeded sine/cosine based Perlin-like noise using world coordinates
+- **Frequency Layers:** 4 octaves at frequencies 0.06, 0.14, 0.27, 0.44 for natural variation
+- **Biome Blending:** Smooth interpolation between plains (75%) and mountains (25%)
+- **Plains Height:** Range 0-4 units with gentle rolling slopes
+- **Mountain Height:** Range 0-14 units with steep peaks
+- **Lake Generation:** 20-unit radius depression centered at (-35, -35) with smooth edge falloff
+- **Island Falloff:** Terrain height decreases beyond 100-unit radius to create island boundary
+- **Chunk Size:** 20x20 unit patches dynamically loaded/unloaded based on player proximity
+
+### HDR & Tone Mapping
+- **HDR Framebuffer:** RGBA16F format for floating-point color values > 1.0
+- **Bloom Intensity:** 0.5f additive blending of bloom texture with scene
+- **Brightness Threshold:** 0.75f luminance cutoff for bloom extraction
+- **Gamma Correction:** Applied as `pow(color, 1.0/2.2)` in final pass
+- **Tone Mapping:** Simple clamping with gamma for natural appearance
+- **Color Precision:** 16-bit float per channel prevents banding and clipping
+
+### Water System
+- **Wave Animation:** Sine-based waves using `sin(position.x * 0.5 + time) + sin(position.z * 0.3 + time * 0.7)`
+- **Wave Height:** 0.3-0.5 unit amplitude with time-dependent variation
+- **Fresnel Effect:** Blend between reflection and refraction based on view angle
+- **Transparency:** Alpha blending with 0.4 opacity for underwater visibility
+- **Specular Highlights:** High specular exponent (128) for sharp sun reflections
+- **Normal Variation:** Per-frame normal perturbation simulates wave surface detail
+
+### Day-Night Cycle
+- **Sun Position Arc:** Complete 360° rotation (2π radians) over 30 seconds
+- **Sun Height:** `sin(angle)` for up/down motion from -90° to +90°
+- **Lighting Transition:** Smooth color transition from day (1.0f brightness) to night (0.15f)
+- **Color Temperature:** Warm (1.0, 0.95, 0.8) for daylight, cool (0.6, 0.7, 1.0) for night
+- **Sky Color:** Interpolates between twilight blue and near-black based on sun height
+- **Moon Position:** Opposite sun on 180° offset for continuous illumination
+
+### Camera System
+- **First-Person View:** Camera positioned at player eye level (1.7 units)
+- **Mouse Sensitivity:** 0.05 radians per pixel for smooth aiming
+- **Pitch Clamping:** Restricted to [-89°, +89°] to prevent camera flip
+- **Yaw Rotation:** Unrestricted 360° rotation around vertical axis
+- **Zoom Levels:** Adjustable 1x-5x magnification with scroll wheel (Z key activates)
+- **Smooth Interpolation:** Camera height smoothly follows terrain at 8.0 units/sec
+
 ### Post-Processing Pipeline
-- **Bloom:** 3-stage Gaussian blur with 0.85 brightness threshold
+- **Bloom:** 3-stage Gaussian blur with 0.75 brightness threshold
 - **Bloom Blending:** Additive blending of bloom texture with gamma correction (2.2)
 - **Gamma:** 2.2 correction applied in final pass
-- All effects stackable and individually toggleable
+- **Vignette:** Screen edge darkening with adjustable intensity
+- **All effects stackable and individually toggleable**
+
+### Performance Optimizations
+- **Terrain Streaming:** Only 9 chunks (3x3 grid) loaded around player position
+- **Chunk Loading Distance:** ~80 units (4 chunks) in any direction
+- **GPU Buffer Management:** VAO/VBO created once, reused each frame
+- **Depth Testing:** Early z-rejection prevents overdraw on opaque surfaces
+- **Frustum Awareness:** Not explicitly culled but limited render distance prevents off-screen rendering
+- **Memory Footprint:** ~2-3 MB per terrain chunk, ~5 MB for shader programs and textures
 
 ### Asset Loading
 - Models: TriangleMesh loader
