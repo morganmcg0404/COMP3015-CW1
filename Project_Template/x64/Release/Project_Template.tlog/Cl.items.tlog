@@ -1,0 +1,8 @@
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\dependencies\GLAD\src\glad.c;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\glad.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\helper\coin.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\coin.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\helper\glslprogram.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\glslprogram.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\helper\glutils.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\glutils.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\helper\text_renderer.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\text_renderer.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\helper\trianglemesh.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\trianglemesh.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\main.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\main.obj
+C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\scenebasic_uniform.cpp;C:\Users\Morgan\Documents\GitHub\COMP3015-CW1\Project_Template\x64\Release\scenebasic_uniform.obj

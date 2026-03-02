@@ -1,6 +1,4 @@
 # Visual Studio Build Directories
-Debug/
-Release/
 x32/
 *.sln
 *.vcxproj.user
@@ -44,4 +42,3 @@ screenshots/
 # Runtime generated files
 coin_positions.txt
 terrain_seed.txt
-
