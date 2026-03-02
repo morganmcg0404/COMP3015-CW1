@@ -16,11 +16,14 @@ x32/
 *.exe
 *.pdb
 *.ilk
-*.lib
 *.exp
-*.dll
 *.res
 *.rc
+
+# Allow library files in dependencies folder
+!dependencies/**/*.lib
+!dependencies/**/*.dll
+!dependencies/**/*.a
 
 # Temporary and Cache Files
 *.tmp
