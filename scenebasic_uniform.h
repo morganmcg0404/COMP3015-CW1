@@ -10,7 +10,6 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <map>
-#include "arena.h"
 
 class SceneBasic_Uniform : public Scene
 {
@@ -114,9 +113,6 @@ private:
     bool firstMouse;
     float yaw;
     float pitch;
-    
-    // Arena
-    Arena arena;
     
     // Sun
     GLuint sunVAO;

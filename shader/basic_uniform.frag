@@ -81,11 +81,14 @@ void main() {
     float minAmbient = 0.1 * lightIntensity;  // Ambient light varies with time of day
     diffuse = max(diffuse, minAmbient);
     
-    // Blinn-Phong specular lighting
+    // Blinn-Phong specular lighting - only calculate if sun is above horizon
     vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+    float sunAboveHorizon = max(sunDir.y, 0.0);  // Only apply if sun is above ground
     vec3 halfVec = normalize(sunDir + viewDir);
-    float spec = pow(max(dot(norm, halfVec), 0.0), 32.0);
-    float specular = renderingCoin ? spec * 0.8 : spec * 0.1;  // Higher specularity for shiny coins
+    // Use different shininess for coins vs terrain - coins get sharper highlights
+    float shininess = renderingCoin ? 64.0 : 32.0;
+    float spec = pow(max(dot(norm, halfVec), 0.0), shininess);
+    float specular = (renderingCoin ? spec * 3.0 : spec * 0.3) * sunAboveHorizon;  // Disable specular when sun is below ground
     
     // Apply diffuse and specular lighting with light color
     vec3 diffuseLighting = texColor * diffuse * lightColor;

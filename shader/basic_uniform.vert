@@ -1,9 +1,9 @@
 #version 460
 
 layout (location = 0) in vec3 VertexPosition;
-layout (location = 1) in vec3 VertexColor;
-layout (location = 2) in vec3 VertexNormal;
-layout (location = 3) in vec2 VertexUV;
+layout (location = 1) in vec3 VertexNormal;  // Normal is at location 1, not color
+layout (location = 2) in vec2 VertexUV;
+layout (location = 3) in vec3 VertexColor;  // Color moved to location 3 (if it exists)
 
 out VS_OUT {
     vec3 FragPos;

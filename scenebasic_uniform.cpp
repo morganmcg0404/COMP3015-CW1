@@ -1466,7 +1466,7 @@ void SceneBasic_Uniform::render()
     glm::vec3 lightPos = glm::vec3(
         cameraPos.x + cos(sunAngle) * sunDistance,
         cameraPos.y + sunHeight * sunDistance,
-        cameraPos.z + sin(sunAngle) * sunDistance * 0.5f
+        cameraPos.z + sin(sunAngle) * sunDistance  // Remove 0.5f to make it symmetric
     );
     
     // Calculate lighting and sky color based on sun height
@@ -1650,7 +1650,7 @@ void SceneBasic_Uniform::render()
     waterProg.setUniform("MVP", waterMVP);
     waterProg.setUniform("ModelMatrix", glm::mat4(1.0f));
     waterProg.setUniform("time", float(glfwGetTime()));
-    waterProg.setUniform("lightPos", lightPos);
+    waterProg.setUniform("sunDirection", glm::normalize(lightPos - cameraPos));  // Use directional sun
     waterProg.setUniform("lightColor", lightColor);
     waterProg.setUniform("cameraPos", cameraPos);
     

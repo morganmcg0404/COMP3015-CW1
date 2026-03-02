@@ -38,14 +38,7 @@ void main()
     // Pass world position for lighting
     vs_out.worldPos = (ModelMatrix * vec4(pos, 1.0)).xyz;
     
-    // Simple normal calculation from waves
-    vec3 tangent = normalize(cross(normal, vec3(0.0, 1.0, 0.0)));
-    vec3 bitangent = cross(normal, tangent);
-    
-    // Perturb normal based on waves (more subtle)
-    vec3 perturbedNormal = normal;
-    perturbedNormal += tangent * sin(pos.x * 0.1 + time * 0.5) * 0.03;
-    perturbedNormal += bitangent * sin(pos.z * 0.1 + time * 0.5) * 0.03;
-    
-    vs_out.normal = normalize(perturbedNormal);
+    // Keep normal flat pointing up - don't perturb it with waves
+    // This preserves specular reflections
+    vs_out.normal = vec3(0.0, 1.0, 0.0);
 }

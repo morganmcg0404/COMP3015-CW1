@@ -159,7 +159,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dependencies\GLAD\src\glad.c" />
-    <ClCompile Include="arena.cpp" />
     <ClCompile Include="helper\coin.cpp" />
     <ClCompile Include="helper\glslprogram.cpp" />
     <ClCompile Include="helper\glutils.cpp" />
@@ -175,7 +174,6 @@
     <None Include="shader\text.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="arena.h" />
     <ClInclude Include="helper\coin.h" />
     <ClInclude Include="helper\drawable.h" />
     <ClInclude Include="helper\glslprogram.h" />
