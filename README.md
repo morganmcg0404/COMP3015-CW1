@@ -233,6 +233,3 @@ COMP3015-CW1/
 ## Demonstration Video
 
 **YouTube Video:** https://www.youtube.com/watch?v=s_5IysgSLS4
-
-**Last Updated:** February 26, 2026  
-**Status:** Complete for COMP3015 CW1 submission
