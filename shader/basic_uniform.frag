@@ -81,6 +81,13 @@ void main() {
     float minAmbient = 0.1 * lightIntensity;  // Ambient light varies with time of day
     diffuse = max(diffuse, minAmbient);
     
+    // Toon shading - quantize diffuse into discrete color bands for cel-shading effect
+    // Only apply to terrain, not coins (renderingCoin = false for terrain)
+    if (!renderingCoin) {
+        float toonLevels = 4.0;  // 4 color bands for cartoon look
+        diffuse = floor(diffuse * toonLevels) / toonLevels;
+    }
+    
     // Blinn-Phong specular lighting - only calculate if sun is above horizon
     vec3 viewDir = normalize(viewPos - fs_in.FragPos);
     float sunAboveHorizon = max(sunDir.y, 0.0);  // Only apply if sun is above ground
